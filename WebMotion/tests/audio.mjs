@@ -9,8 +9,11 @@ const vowels=['u','a','i'].map(v=>keys.map(k=>cat.vowelTargets.male[v]?.artic[k]
 let Processor;globalThis.sampleRate=48000;globalThis.currentTime=0;let lastSnapshot;
 globalThis.AudioWorkletProcessor=class{port={postMessage:m=>{if(m.type==='error')throw new Error(m.message);lastSnapshot=m;},onmessage:null};};
 globalThis.registerProcessor=(name,cls)=>{Processor=cls;};await import('../dist/audio-worklet.js');
-const pcm=await readFile(new URL('../dist/shaker.pcm',import.meta.url));
-function create(){return new Processor({processorOptions:{module,pcm:pcm.buffer.slice(pcm.byteOffset,pcm.byteOffset+pcm.byteLength),vowels}});}
+const pcm=await readFile(new URL('../dist/shaker-strokes.pcm',import.meta.url));
+const shakerBank=JSON.parse(await readFile(new URL('../dist/shaker-bank.json',import.meta.url),'utf8'));
+assert.equal(pcm.length,shakerBank.count*shakerBank.frames_per_stroke*2);
+for(let i=0;i<shakerBank.count;i++){const base=i*shakerBank.frames_per_stroke;assert.equal(pcm.readInt16LE(base*2),0);assert.equal(pcm.readInt16LE((base+shakerBank.lengths[i]-1)*2),0);assert(shakerBank.lengths[i]>=4800);}
+function create(){return new Processor({processorOptions:{module,pcm:pcm.buffer.slice(pcm.byteOffset,pcm.byteOffset+pcm.byteLength),shakerBank,vowels}});}
 let p=create();
 function render(mode,enabled,blocks=400,voice=0,moving=false,frequency=220,vowel=.7){let energy=0,peak=0;const samples=[];
  for(let i=0;i<blocks;i++){

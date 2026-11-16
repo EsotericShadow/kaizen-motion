@@ -5,17 +5,18 @@ export class GrainChamber {
  grains:Grain[]=Array.from({length:64},()=>({x:0,y:0,z:0,vx:0,vy:0,vz:0,r:.25}));
  pulses=Array.from({length:6},()=>({x:0,y:0,t:-100,strength:0}));
  count=36;w=.045;h=.052;d=.024;radius=.0008;shape='box';quiet=0;seed=12345;
+ wallEnergy=new Float64Array(6);
  collisionEnergy=0;collisions=0;agitation=0;
  constructor(){this.reset(36);}
  random(){this.seed^=this.seed<<13;this.seed^=this.seed>>>17;this.seed^=this.seed<<5;return (this.seed>>>0)/4294967296;}
  reset(count:number){this.count=clamp(count|0,1,64);for(let i=0;i<64;i++){const a=this.random()*Math.PI*2,r=Math.sqrt(this.random())*.28,g=this.grains[i];g.x=Math.cos(a)*this.w*r;g.y=Math.sin(a)*this.h*r;g.z=(this.random()-.5)*this.d*.65;g.vx=g.vy=g.vz=0;g.r=.18+this.random()*.2;}for(const p of this.pulses)p.t=-100;this.quiet=0;this.agitation=0;this.collisionEnergy=this.collisions=0;}
  contact(g:Grain,speed:number,wall:number,now:number){
   if(speed<.025||this.agitation<.008)return;
-  this.collisions++;this.collisionEnergy+=speed*speed/this.count;
+  this.collisions++;this.collisionEnergy+=speed*speed/this.count;this.wallEnergy[wall]+=speed*speed/this.count;
   const p=this.pulses[wall];p.x=g.x;p.y=g.y;p.t=now;p.strength=speed;
  }
  step(dt:number,acc:number[],tilt:number[],energy:number,now:number){
-  this.collisionEnergy=this.collisions=0;
+  this.collisionEnergy=this.collisions=0;this.wallEnergy.fill(0);
   if(dt>.1){for(let i=0;i<this.count;i++){const g=this.grains[i];g.vx=g.vy=g.vz=0;}return;}
   this.agitation=Math.max(energy,this.agitation*Math.exp(-dt/.11));
   this.quiet=energy<.012?this.quiet+dt:0;

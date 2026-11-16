@@ -1,0 +1,29 @@
+[
+  {
+    "file": "maraca-variants-el-boss.mp3",
+    "download": "https://cdn.freesound.org/previews/625/625654_9129912-hq.mp3",
+    "source": "https://freesound.org/people/el_boss/sounds/625654/",
+    "author": "el_boss",
+    "license": "CC0-1.0",
+    "sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+    "quality": "public high-quality MP3 preview"
+  },
+  {
+    "file": "maraca-multitakes-sadiquecat.mp3",
+    "download": "https://cdn.freesound.org/previews/792/792497_5287430-hq.mp3",
+    "source": "https://freesound.org/people/Sadiquecat/sounds/792497/",
+    "author": "Sadiquecat",
+    "license": "CC0-1.0",
+    "sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+    "quality": "public high-quality MP3 preview"
+  },
+  {
+    "file": "maraca-joseph-sardin.wav",
+    "download": "https://bigsoundbank.com/UPLOAD/bwf-en/2527.wav",
+    "source": "https://bigsoundbank.com/maraca-1-s2527.html",
+    "author": "Joseph SARDIN",
+    "license": "CC0-1.0",
+    "sha256": "c4f23a879a2c344413e9b9674ce19f9ac27633fd6848ee927514cdff1e81d47c",
+    "quality": "original WAV"
+  }
+]

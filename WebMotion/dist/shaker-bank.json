@@ -1,0 +1,355 @@
+{
+  "version": 1,
+  "sample_rate": 48000,
+  "frames_per_stroke": 16384,
+  "count": 32,
+  "families": [
+    [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  ],
+  "lengths": [
+    5328,
+    9168,
+    8688,
+    9648,
+    12288,
+    11328,
+    15888,
+    5568,
+    13008,
+    13968,
+    6288,
+    13008,
+    13248,
+    13248,
+    12048,
+    12768,
+    9648,
+    7248,
+    13248,
+    8928,
+    6768,
+    9888,
+    7248,
+    7008,
+    7488,
+    5568,
+    11328,
+    6048,
+    4848,
+    6048,
+    5328,
+    16384
+  ],
+  "pcm_sha256": "716db3ac074b3cfeb3b6832bf015e20952df6368c1e80731a6471ee64d933904",
+  "strokes": [
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 87552,
+      "end_frame": 92880,
+      "length": 5328,
+      "rms": 0.02096559434491155
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 130992,
+      "end_frame": 140160,
+      "length": 9168,
+      "rms": 0.02980933874851302
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 192672,
+      "end_frame": 201360,
+      "length": 8688,
+      "rms": 0.03379057938946266
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 291312,
+      "end_frame": 300960,
+      "length": 9648,
+      "rms": 0.21951988846760512
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 338112,
+      "end_frame": 350400,
+      "length": 12288,
+      "rms": 0.1839103888555951
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 453072,
+      "end_frame": 464400,
+      "length": 11328,
+      "rms": 0.1487549817230441
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 503232,
+      "end_frame": 519120,
+      "length": 15888,
+      "rms": 0.05958024124956172
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 643872,
+      "end_frame": 649440,
+      "length": 5568,
+      "rms": 0.02367181333897669
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 760272,
+      "end_frame": 773280,
+      "length": 13008,
+      "rms": 0.05331432138544433
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 842112,
+      "end_frame": 856080,
+      "length": 13968,
+      "rms": 0.05936745327067116
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 948912,
+      "end_frame": 955200,
+      "length": 6288,
+      "rms": 0.03231145812504292
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 1023552,
+      "end_frame": 1036560,
+      "length": 13008,
+      "rms": 0.05906249335853424
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 1205952,
+      "end_frame": 1219200,
+      "length": 13248,
+      "rms": 0.05983872060771563
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 1302672,
+      "end_frame": 1315920,
+      "length": 13248,
+      "rms": 0.05313867243297874
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 1397472,
+      "end_frame": 1409520,
+      "length": 12048,
+      "rms": 0.06615191254042832
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "source_sha256": "45820d5f5a743697d0a382554bd907a95304e04ba1cf40e9ae5b0eff123b909a",
+      "start_frame": 1460352,
+      "end_frame": 1473120,
+      "length": 12768,
+      "rms": 0.0600343734425256
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 24672,
+      "end_frame": 34320,
+      "length": 9648,
+      "rms": 0.008047038764924817
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 193152,
+      "end_frame": 200400,
+      "length": 7248,
+      "rms": 0.00988677817070135
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 358992,
+      "end_frame": 372240,
+      "length": 13248,
+      "rms": 0.022521745525904472
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 529632,
+      "end_frame": 538560,
+      "length": 8928,
+      "rms": 0.028863631086460097
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 719952,
+      "end_frame": 726720,
+      "length": 6768,
+      "rms": 0.024812688873778313
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 861792,
+      "end_frame": 871680,
+      "length": 9888,
+      "rms": 0.022630323063759155
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 1057392,
+      "end_frame": 1064640,
+      "length": 7248,
+      "rms": 0.04421712176000863
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 1167072,
+      "end_frame": 1174080,
+      "length": 7008,
+      "rms": 0.030484254860584873
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 1289472,
+      "end_frame": 1296960,
+      "length": 7488,
+      "rms": 0.029285817947978295
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 1478112,
+      "end_frame": 1483680,
+      "length": 5568,
+      "rms": 0.020650151150767786
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 1618032,
+      "end_frame": 1629360,
+      "length": 11328,
+      "rms": 0.034006653528491915
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 1779552,
+      "end_frame": 1785600,
+      "length": 6048,
+      "rms": 0.02039296065341811
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 1994832,
+      "end_frame": 1999680,
+      "length": 4848,
+      "rms": 0.024741935158869778
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 2136672,
+      "end_frame": 2142720,
+      "length": 6048,
+      "rms": 0.013006896020737306
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 2253552,
+      "end_frame": 2258880,
+      "length": 5328,
+      "rms": 0.04792022596975299
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "source_sha256": "150362a16978f071bff9ff8f0f9be58c073ec8be15b4fe5d4315fbc1ad841c5b",
+      "start_frame": 2412192,
+      "end_frame": 2428576,
+      "length": 16384,
+      "rms": 0.02819955289844406
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { initChimera, chimeraModule, call } from './wasm/chimera';
 import { NEUTRAL } from './neutral';
 import { GrainChamber, Grip, clamp } from './physics';
 import { SYNTH_VOICES } from './synth';
+import { initCommunity } from './community';
 
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const canvas=$<HTMLCanvasElement>('field'),ctx=canvas.getContext('2d')!;
@@ -13,7 +14,7 @@ const pause=$<HTMLButtonElement>('pause'),chamber=new GrainChamber(),grip=new Gr
 const keys=['jaw','tbX','tbY','ttX','ttY','ttCurl','root','lipAp','lipProt','lipWidth','labiodental','velum','larynx','epilarynx','ventricular','lateral','dorsum'];
 let audio:AudioContext|undefined,node:AudioWorkletNode|undefined,mode=2,playing=false,busy=false,loaded=false;
 let synthVoice=0,lastSnapshot=0,scope=new Float32Array(512),scopeWrite=0;
-let catalog:any,pcm:ArrayBuffer,vowels:number[][],artic:any={...NEUTRAL};
+let catalog:any,pcm:ArrayBuffer,shakerBank:any,vowels:number[][],artic:any={...NEUTRAL};
 let head:Anatomy3D|undefined,gl:THREE.WebGLRenderer|undefined,orbit:OrbitControls|undefined,model:any;
 let gravity=[0,-1,0],acceleration=[0,0,0],rotation=[0,0,0],tilt=[0,0],lastSensor=0;
 let manualX=.5,manualY=.5,touchedUntil=0,pulseUntil=0,effort=0,lastFrame=performance.now(),lastSent=0,lastHead=0,sensitivity=.62;
@@ -27,8 +28,10 @@ const resources=(async()=>{
  catalog=call('catalog');
  const table=catalog.vowelTargets.male;
  vowels=['u','a','i'].map(v=>keys.map(k=>table[v]?.artic[k]??catalog.neutral[k]));
- const response=await fetch('./shaker.pcm');if(!response.ok)throw new Error('Shaker samples could not load.');pcm=await response.arrayBuffer();
- if(pcm.byteLength!==64*2048*2)throw new Error('Incomplete shaker samples.');
+ const [response,metadata]=await Promise.all([fetch('./shaker-strokes.pcm'),fetch('./shaker-bank.json')]);
+ if(!response.ok||!metadata.ok)throw new Error('Shaker recordings could not load.');
+ [pcm,shakerBank]=await Promise.all([response.arrayBuffer(),metadata.json()]);
+ if(pcm.byteLength!==shakerBank.count*shakerBank.frames_per_stroke*2)throw new Error('Incomplete shaker recordings.');
  loaded=true;if(mode===2)ensureHead();startButton.disabled=touchStart.disabled=false;$('load-status').textContent='Ready. Start with your volume low.';
 })().catch(e=>{notice('The instruments could not load. Check your connection and reload.');$('load-status').textContent=String(e);throw e;});
 function notice(text:string){$('notice').textContent=text;}
@@ -55,7 +58,7 @@ async function begin(motion:boolean){
   const allowed=motion?requestMotion().catch(()=>false):Promise.resolve(false);
   await Promise.all([resumed,resources]);sensorPermission=await allowed;
   await audio.audioWorklet.addModule('./audio-worklet.js');
-  node=new AudioWorkletNode(audio,'motion-audio',{numberOfInputs:0,numberOfOutputs:1,outputChannelCount:[2],processorOptions:{module:chimeraModule(),pcm,vowels}});
+  node=new AudioWorkletNode(audio,'motion-audio',{numberOfInputs:0,numberOfOutputs:1,outputChannelCount:[2],processorOptions:{module:chimeraModule(),pcm,shakerBank,vowels}});
   node.onprocessorerror=()=>{playing=false;status();notice('The audio engine stopped. Reload to restart it.');};
   node.port.onmessage=e=>{
    if(e.data.type==='scope'){scope=e.data.values;scopeWrite=e.data.writeIndex;}
@@ -206,3 +209,5 @@ $('share').addEventListener('click',async()=>{try{const url=location.origin+loca
 const motionButton=document.createElement('button');motionButton.textContent='Enable motion';motionButton.addEventListener('click',async()=>{sensorPermission=await requestMotion().catch(()=>false);firstSensor=true;notice(sensorPermission?'Motion enabled. Hold comfortably and tap CENTRE.':'Motion permission is unavailable here. Open in Safari/Chrome or keep playing with touch.');status();});document.querySelector('footer nav')?.appendChild(motionButton);
 
 setMode(2);
+
+initCommunity(()=>({instrument:["Shaker","Synth","CHIMERA"][mode],voice:mode===1?SYNTH_VOICES[synthVoice].name:mode===2?"CHIMERA":"Shaker",sensitivity:Math.round(sensitivity*100),shape:chamber.shape,grainCount:chamber.count}),()=>{playing=false;send(true);status();});

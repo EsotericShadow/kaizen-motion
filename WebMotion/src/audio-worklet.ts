@@ -12,7 +12,7 @@ class MotionAudio extends AudioWorkletProcessor {
  pitchMix=1-Math.exp(-1/(sampleRate*.012));gainMix=1-Math.exp(-1/(sampleRate*.008));
  constructor(options:any){
   super();const o=options.processorOptions;this.x=new WebAssembly.Instance(o.module,{}).exports;this.h=this.x.engine_new(sampleRate);this.values=this.x.engine_values(this.h);this.vowels=o.vowels;this.vocalBuffer=new Float32Array(this.x.memory.buffer,this.x.engine_render(this.h,0),4096);
-  this.synth=new SynthBank(sampleRate);this.shaker=new PhysicalShaker(sampleRate,new Int16Array(o.pcm));
+  this.synth=new SynthBank(sampleRate);this.shaker=new PhysicalShaker(sampleRate,new Int16Array(o.pcm),o.shakerBank);
   const v=this.scratch();v[0]=311;v[1]=.018;v[2]=8;v[6]=.05;v[9]=0;this.x.engine_set_source(this.h);
   this.port.onmessage=e=>{
    const p=e.data;

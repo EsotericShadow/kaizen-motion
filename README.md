@@ -10,7 +10,7 @@ An open-source motion instrument: shake, tilt and rotate an iPhone or iPad to pl
 
 ## Play in your browser
 
-**[Open the Motion web demo](https://kaizen-motion.kaizenstrate-5328.chatgpt.site)** — no install or account. Starts on the real CHIMERA WASM voice with live 3D anatomy. Synths include Theremin, Velvet, Glass, Orbit and Reed. The Shaker uses audio-clock XYZ grain contacts; the display shows the same particles. Enable motion on a supported phone, or use touch/mouse controls. Browser latency and sensor behavior still need physical acceptance; this demo has no native Mac link or AUv3 hosting. Web source and build instructions are in [`WebMotion`](WebMotion/README.md).
+**[Open the Motion web demo](https://kaizendsp.com/motion)** — no install or account. Starts on the real CHIMERA WASM voice with live 3D anatomy. Synths include Theremin, Velvet, Glass, Orbit and Reed. The Shaker uses audio-clock XYZ grain contacts and 32 complete recorded rattles; the display shows the same particles. Feedback and native beta access requests are available in the demo. Enable motion on a supported phone, or use touch/mouse controls. Browser latency and sensor behavior still need physical acceptance; this demo has no native Mac link or AUv3 hosting. Web source and build instructions are in [`WebMotion`](WebMotion/README.md).
 
 ## Instruments
 
