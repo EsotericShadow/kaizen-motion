@@ -4,6 +4,10 @@ An open-source motion instrument: shake, tilt and rotate an iPhone or iPad to pl
 
 **Development beta.** Shaker feel and texture are being tuned on physical hardware. This is not a finished release. iOS and Apple Silicon macOS have engineering builds; Android and Windows apps are planned, not delivered. The AUv3 is MIDI-only and requires a compatible instrument/host route.
 
+![CHIMERA anatomical head in Motion](docs/chimera-head-simulator.png)
+
+*Simulator fixture showing the native CHIMERA anatomy; synthetic motion, not a physical device acceptance test.*
+
 ## Instruments
 
 - **Shaker:** loose XYZ grains inside a box, circle or oval; adjustable dimensions, grain size and count. Contact-local pulses show collisions. Continuous measured shaking effort drives overlapping recorded grains, without beat quantization.
