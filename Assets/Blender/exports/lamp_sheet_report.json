@@ -1,0 +1,123 @@
+{
+  "tile_cpx": [
+    72,
+    44
+  ],
+  "px_per_cpx": 4,
+  "plain_panel_residual_warmth_max_linear": 0.004,
+  "lamp_light_linear": [
+    1.0,
+    0.3568,
+    0.0378
+  ],
+  "slots": [
+    {
+      "slot": 0,
+      "centroid_cpx": [
+        110.37,
+        1071.06
+      ],
+      "tile_origin_cpx": [
+        74,
+        1049
+      ],
+      "baked_amber_peak_linear": 0.9343,
+      "unlit_bezel_residual_warmth_max_linear": 0.00322,
+      "unlit_lens_mean_srgb": [
+        38.0,
+        30.0,
+        22.7
+      ]
+    },
+    {
+      "slot": 1,
+      "centroid_cpx": [
+        110.41,
+        1117.64
+      ],
+      "tile_origin_cpx": [
+        74,
+        1096
+      ],
+      "baked_amber_peak_linear": 0.9369,
+      "unlit_bezel_residual_warmth_max_linear": 0.00428,
+      "unlit_lens_mean_srgb": [
+        37.7,
+        29.6,
+        22.3
+      ]
+    },
+    {
+      "slot": 2,
+      "centroid_cpx": [
+        110.31,
+        1164.99
+      ],
+      "tile_origin_cpx": [
+        74,
+        1143
+      ],
+      "baked_amber_peak_linear": 0.8291,
+      "unlit_bezel_residual_warmth_max_linear": 0.00378,
+      "unlit_lens_mean_srgb": [
+        37.4,
+        29.3,
+        21.9
+      ]
+    },
+    {
+      "slot": 3,
+      "centroid_cpx": [
+        110.2,
+        1211.17
+      ],
+      "tile_origin_cpx": [
+        74,
+        1189
+      ],
+      "baked_amber_peak_linear": 0.8173,
+      "unlit_bezel_residual_warmth_max_linear": 0.0039,
+      "unlit_lens_mean_srgb": [
+        36.9,
+        28.8,
+        21.4
+      ]
+    },
+    {
+      "slot": 4,
+      "centroid_cpx": [
+        109.97,
+        1257.62
+      ],
+      "tile_origin_cpx": [
+        74,
+        1236
+      ],
+      "baked_amber_peak_linear": 0.8691,
+      "unlit_bezel_residual_warmth_max_linear": 0.00236,
+      "unlit_lens_mean_srgb": [
+        36.3,
+        28.2,
+        20.8
+      ]
+    },
+    {
+      "slot": 5,
+      "centroid_cpx": [
+        109.96,
+        1302.99
+      ],
+      "tile_origin_cpx": [
+        74,
+        1281
+      ],
+      "baked_amber_peak_linear": 0.9745,
+      "unlit_bezel_residual_warmth_max_linear": 0.00331,
+      "unlit_lens_mean_srgb": [
+        36.2,
+        28.0,
+        20.6
+      ]
+    }
+  ]
+}

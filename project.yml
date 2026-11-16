@@ -1,0 +1,81 @@
+name: KaizenMotion
+
+options:
+  bundleIdPrefix: com.kaizendsp
+  deploymentTarget:
+    iOS: "17.0"
+  groupSortPosition: top
+  xcodeVersion: "26.0"
+
+packages:
+  MotionCore:
+    path: Packages/MotionCore
+
+settings:
+  base:
+    CLANG_CXX_LANGUAGE_STANDARD: c++20
+    CLANG_ENABLE_OBJC_ARC: YES
+    CURRENT_PROJECT_VERSION: 1
+    GENERATE_INFOPLIST_FILE: NO
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    MARKETING_VERSION: 0.1.0
+    SWIFT_STRICT_CONCURRENCY: minimal
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+
+targets:
+  KaizenMotion:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+        excludes: [Resources/ChimeraHead]
+      - path: App/Resources/ChimeraHead
+        type: folder
+        buildPhase: resources
+      - SharedPlatform
+      - SharedUI
+    dependencies:
+      - package: MotionCore
+      - target: MotionMIDIExtension
+        embed: true
+    settings:
+      base:
+        INFOPLIST_FILE: App/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.kaizendsp.motion
+        PRODUCT_NAME: KaizenMotion
+        CODE_SIGN_STYLE: Automatic
+        SUPPORTS_MACCATALYST: NO
+
+  MotionMIDIExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Extension
+      - SharedPlatform
+      - SharedUI
+    dependencies:
+      - package: MotionCore
+    settings:
+      base:
+        INFOPLIST_FILE: Extension/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.kaizendsp.motion.midi
+        PRODUCT_NAME: MotionMIDIExtension
+        PRODUCT_MODULE_NAME: MotionMIDIExtension
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
+        SWIFT_OBJC_BRIDGING_HEADER: Extension/MotionMIDIExtension-Bridging-Header.h
+        HEADER_SEARCH_PATHS: "$(SRCROOT)/Extension"
+        CODE_SIGN_STYLE: Automatic
+        SUPPORTS_MACCATALYST: NO
+
+schemes:
+  KaizenMotion:
+    build:
+      targets:
+        KaizenMotion: all
+        MotionMIDIExtension: all
+    run:
+      config: Debug
+    archive:
+      config: Release

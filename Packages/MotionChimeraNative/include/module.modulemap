@@ -1,0 +1,4 @@
+module MotionChimeraNative {
+  header "MotionChimeraNative.h"
+  export *
+}

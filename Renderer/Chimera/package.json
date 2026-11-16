@@ -1,0 +1,1 @@
+{"name":"motion-chimera-head","private":true,"scripts":{"build":"bun build src/main.ts --target browser --minify --outfile ../../App/Resources/ChimeraHead/head.js"},"dependencies":{"three":"0.186.1"}}

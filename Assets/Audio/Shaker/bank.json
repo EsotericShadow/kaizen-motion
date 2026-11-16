@@ -1,0 +1,263 @@
+{
+  "sample_rate": 48000,
+  "frames_per_excerpt": 2048,
+  "excerpts": [
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 236483
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 251876
+    },
+    {
+      "source": "maraca-joseph-sardin.wav",
+      "start_frame": 2486
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 292562
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 437646
+    },
+    {
+      "source": "maraca-joseph-sardin.wav",
+      "start_frame": 7559
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 295432
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1024389
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 297971
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1040882
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 302940
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1058720
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 307605
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1076239
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 312913
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1091704
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 317535
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1123244
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 320566
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1138464
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 323078
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1184031
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 328215
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1200062
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 333592
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1215310
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 338784
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1306736
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 341555
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1321841
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 344040
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1337560
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 348948
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1353119
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 353931
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1491545
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 358735
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1515392
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 363726
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1538286
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 456293
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1550809
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 458919
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1562670
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 467355
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1585244
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 490648
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1596884
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 508915
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1619471
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 680463
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1643524
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 761911
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1692681
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 844812
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1918770
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 926922
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1941014
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 1002198
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1962118
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 1024941
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 1983406
+    },
+    {
+      "source": "maraca-variants-el-boss.mp3",
+      "start_frame": 1046547
+    },
+    {
+      "source": "maraca-multitakes-sadiquecat.mp3",
+      "start_frame": 2003863
+    }
+  ],
+  "header_sha256": "d9c8cf5a9ce60734a24c56810e3c2ecf8a5a6c231e70f1bfc77563b110a8bea5"
+}

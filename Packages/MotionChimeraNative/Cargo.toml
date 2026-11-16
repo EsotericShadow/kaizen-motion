@@ -1,0 +1,18 @@
+[package]
+name = "motion-chimera-native"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+[lib]
+name = "MotionChimeraNative"
+crate-type = ["staticlib", "rlib"]
+[dependencies]
+chimera = { path = "vendor/chimera" }
+serde_json = "1"
+[profile.release]
+opt-level = 3
+codegen-units = 1
+lto = "fat"
+panic = "abort"
+[workspace]
+members = ["vendor/chimera"]

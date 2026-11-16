@@ -1,0 +1,26 @@
+cmake_minimum_required(VERSION 3.22)
+project(KaizenMotionAudioCore VERSION 0.1.0 LANGUAGES C CXX)
+
+# Framework-independent audio boundary. Native UI, sensors, networking and
+# purchase entitlements remain responsibilities of platform wrappers.
+set(MOTION_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
+set(MOTION_DSP "${MOTION_ROOT}/Packages/MotionCore/Sources/MotionToneDSP")
+add_library(KaizenMotionAudioCore STATIC "${MOTION_DSP}/MotionToneDSP.c")
+target_include_directories(KaizenMotionAudioCore PUBLIC "${MOTION_DSP}/include")
+target_compile_features(KaizenMotionAudioCore PUBLIC c_std_11)
+set_target_properties(KaizenMotionAudioCore PROPERTIES POSITION_INDEPENDENT_CODE ON)
+if(MSVC AND CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(KaizenMotionAudioCore PRIVATE /experimental:c11atomics)
+endif()
+if(UNIX AND NOT APPLE)
+    target_link_libraries(KaizenMotionAudioCore PUBLIC m)
+endif()
+
+option(MOTION_BUILD_PORTABILITY_CHECKS "Build the native C++ ABI/behavior check" ON)
+if(MOTION_BUILD_PORTABILITY_CHECKS)
+    enable_testing()
+    add_executable(MotionDspPortabilityCheck "${MOTION_ROOT}/scripts/testing/check_portable_dsp.cpp")
+    target_compile_features(MotionDspPortabilityCheck PRIVATE cxx_std_17)
+    target_link_libraries(MotionDspPortabilityCheck PRIVATE KaizenMotionAudioCore)
+    add_test(NAME MotionDspPortabilityCheck COMMAND MotionDspPortabilityCheck)
+endif()

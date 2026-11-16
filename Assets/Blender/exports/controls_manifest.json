@@ -1,0 +1,145 @@
+{
+  "vertical_stretch": 1.023,
+  "sheets": {
+    "MotionSelectorAtlas": {
+      "frames": 6,
+      "grid": [
+        3,
+        2
+      ],
+      "frame_px": 320,
+      "span_cpx": 216.0,
+      "centre_cpx": [
+        279.6,
+        1173.8
+      ],
+      "zero_frame": 0,
+      "step_degrees": 30.0,
+      "size_px": [
+        960,
+        640
+      ],
+      "sha256": "e92ba0bb5c659db7b27421086e3a58e3c044a348f2852131bc341129ea04737a",
+      "app_copy_sha256": "e92ba0bb5c659db7b27421086e3a58e3c044a348f2852131bc341129ea04737a"
+    },
+    "MotionSelectorShadow": {
+      "frame_px": 384,
+      "span_cpx": 320.0,
+      "centre_cpx": [
+        279.6,
+        1173.8
+      ],
+      "size_px": [
+        384,
+        384
+      ],
+      "sha256": "97d10ca07ea30fd793641826d56f1e504a4698f48b7417f0871ed9f6fdb2195b",
+      "app_copy_sha256": "97d10ca07ea30fd793641826d56f1e504a4698f48b7417f0871ed9f6fdb2195b"
+    },
+    "MotionSensitivityAtlas": {
+      "frames": 64,
+      "grid": [
+        8,
+        8
+      ],
+      "frame_px": 448,
+      "span_cpx": 336.0,
+      "centre_cpx": [
+        630.3,
+        1192.2
+      ],
+      "zero_frame": 32,
+      "step_degrees": 4.354839,
+      "size_px": [
+        3584,
+        3584
+      ],
+      "sha256": "59f331e544e2456ae7fbee831eab9fc2844d4e913913db46fbfbc5714f25084a",
+      "app_copy_sha256": "59f331e544e2456ae7fbee831eab9fc2844d4e913913db46fbfbc5714f25084a"
+    },
+    "MotionSensitivityShadow": {
+      "frame_px": 528,
+      "span_cpx": 440.0,
+      "centre_cpx": [
+        630.3,
+        1192.2
+      ],
+      "size_px": [
+        528,
+        528
+      ],
+      "sha256": "652e37db358f186f15a4ad59a6eac90bc9cf1a0a997b617fc5eb5c38fe49eb91",
+      "app_copy_sha256": "652e37db358f186f15a4ad59a6eac90bc9cf1a0a997b617fc5eb5c38fe49eb91"
+    },
+    "MotionArmSwitchAtlas": {
+      "frames": 2,
+      "grid": [
+        2,
+        1
+      ],
+      "index": {
+        "armed": 0,
+        "muted": 1
+      },
+      "frame_px": 216,
+      "span_cpx": 136.0,
+      "centre_cpx": [
+        425.8,
+        1606.0
+      ],
+      "size_px": [
+        432,
+        216
+      ],
+      "sha256": "4737221d092e6b0fdc6011f1983ff2ebd7c39222430dda152fc9da8565cb9b37",
+      "app_copy_sha256": "4737221d092e6b0fdc6011f1983ff2ebd7c39222430dda152fc9da8565cb9b37"
+    },
+    "MotionLampAtlas": {
+      "grid": [
+        6,
+        2
+      ],
+      "rows": {
+        "unlit": 0,
+        "lit": 1
+      },
+      "tile_cpx": [
+        72,
+        44
+      ],
+      "px_per_cpx": 4,
+      "tile_origins_cpx": [
+        [
+          74,
+          1049
+        ],
+        [
+          74,
+          1096
+        ],
+        [
+          74,
+          1143
+        ],
+        [
+          74,
+          1189
+        ],
+        [
+          74,
+          1236
+        ],
+        [
+          74,
+          1281
+        ]
+      ],
+      "size_px": [
+        1728,
+        352
+      ],
+      "sha256": "95385c5fdfff56de6f18de8fc204daf7affacd0a9ea8890f0c0de7d978ed7ff8",
+      "app_copy_sha256": "95385c5fdfff56de6f18de8fc204daf7affacd0a9ea8890f0c0de7d978ed7ff8"
+    }
+  }
+}

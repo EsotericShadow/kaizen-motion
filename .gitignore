@@ -1,0 +1,17 @@
+.DS_Store
+.build/
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+Assets/Blender/renders/
+__pycache__/
+*.blend1
+
+# Reproducible Rust build outputs (see scripts/build_chimera_native.sh).
+Packages/MotionChimeraNative/target/
+
+node_modules/
+Packages/MotionChimeraNative/artifacts/
+KaizenMotion.xcodeproj/
+*.log

@@ -1,0 +1,11 @@
+{
+  "size_px": [
+    1024,
+    1024
+  ],
+  "mode": "RGB",
+  "source_render": "renders/app_icon/AppIcon-render.png",
+  "export_sha256": "f9f31b77cb6d8266416e0c4f11546f7103ec8d849af5069a519ed278b9fcfe8f",
+  "app_icon_sha256": "f9f31b77cb6d8266416e0c4f11546f7103ec8d849af5069a519ed278b9fcfe8f",
+  "preview": "AppIcon-small-sizes.png"
+}
