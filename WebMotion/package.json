@@ -1,0 +1,1 @@
+{"name":"kaizen-motion-web","private":true,"type":"module","scripts":{"build":"bun build src/main.ts --minify --outfile dist/app.js --target browser && bun build src/audio-worklet.ts --minify --outfile dist/audio-worklet.js --target browser","dev":"python3 -m http.server 4173 --directory dist --bind 127.0.0.1"},"dependencies":{"three":"0.186.1"}}

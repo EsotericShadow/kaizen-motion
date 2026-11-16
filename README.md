@@ -8,6 +8,10 @@ An open-source motion instrument: shake, tilt and rotate an iPhone or iPad to pl
 
 *Simulator fixture showing the native CHIMERA anatomy; synthetic motion, not a physical device acceptance test.*
 
+## Play in your browser
+
+**[Open the Motion web demo](https://kaizen-motion.kaizenstrate-5328.chatgpt.site)** — no install or account. Shaker, Classic Theremin and the real CHIMERA WASM voice, with live 3D anatomy. Enable motion on a supported phone, or use touch/mouse controls. Browser latency and sensor behavior still need physical acceptance; this demo has no native Mac link or AUv3 hosting. Web source and build instructions are in [`WebMotion`](WebMotion/README.md).
+
 ## Instruments
 
 - **Shaker:** loose XYZ grains inside a box, circle or oval; adjustable dimensions, grain size and count. Contact-local pulses show collisions. Continuous measured shaking effort drives overlapping recorded grains, without beat quantization.
