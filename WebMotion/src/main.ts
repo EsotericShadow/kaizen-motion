@@ -6,7 +6,7 @@ import { NEUTRAL } from './neutral';
 import { GrainChamber, Grip, clamp } from './physics';
 import { SYNTH_VOICES } from './synth';
 import { initCommunity } from './community';
-import { noteFrequency, pitchNote, octaveNotes } from './notes';
+import { noteFrequency, pitchNote, scaleNotes, nearestAllowedNote, pitchClass } from './notes';
 import { initUsage } from './usage';
 import { MotionExcitation } from './motion-excitation';
 
@@ -26,6 +26,7 @@ let filteredPitch=.5,filteredVowel=.5,sensorPermission=false,firstSensor=true,ge
 let width=360,height=240,activePointer=false,lastPoint:any=null,orientationZero:number|null=null,rawGamma=0;
 let transferPointer:number|undefined;
 let heldMidi:number|null=null,noteOctave=4,noteBrowse=false,actualFrequency=311;
+let scaleEnabled=false,scaleRoot=0,scalePreset='major',allowedNotes=scaleNotes(0,'major'),lastSnapped:number|null=null,notesVisible=true,editingNotes=false;
 const motionExcitation=new MotionExcitation();
 let touchExcitation=0,touchExcitationAt=-Infinity;
 let lastControl:{frequency:number;vowel:number;breath:number;excitation?:number}={frequency:311,vowel:.5,breath:.55};
@@ -41,7 +42,8 @@ const resources=(async()=>{
  if(pcm.byteLength!==shakerBank.count*shakerBank.frames_per_stroke*2)throw new Error('Incomplete shaker recordings.');
  loaded=true;if(mode===2)ensureHead();startButton.disabled=touchStart.disabled=false;$('load-status').textContent='Ready. Start with your volume low.';
 })().catch(e=>{notice('The instruments could not load. Check your connection and reload.');$('load-status').textContent=String(e);throw e;});
-function notice(text:string){$('notice').textContent=text;}
+let noticeTimer:ReturnType<typeof setTimeout>|undefined;
+function notice(text:string){$('notice').textContent=text;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{$('notice').textContent='';},4500);}
 function status(){
  $('status').textContent=node?(playing?'SOUND ON':'SOUND PAUSED'):'READY TO PLAY';$('live-led').classList.toggle('on',playing);
  pause.disabled=!node;pause.textContent=playing?'Ⅱ':'▶';pause.setAttribute('aria-label',playing?'Pause sound':'Resume sound');
@@ -97,11 +99,11 @@ function setMode(next:number){
  mode=next;motionExcitation.reset();touchExcitation=0;touchExcitationAt=-Infinity;if(heldMidi!==null&&noteFrequency(heldMidi)>(mode===2?880:1760))heldMidi=null;effort=0;pulseUntil=0;chamber.reset(chamber.count);
  document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach(b=>{const selected=Number(b.dataset.mode)===mode;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
  $('excitation-controls').hidden=mode!==2;
- $('note-panel').hidden=mode===0;renderNoteGrid();
+ $('note-panel').hidden=mode===0;$('shaker-options').hidden=mode!==0;$('note-plane').hidden=mode===0;$('mode-hint').hidden=mode===1;renderNoteGrid();
  $('chamber').hidden=mode!==0;$('touch-pad').hidden=mode===0;$('synth-bank').hidden=mode!==1;
  $('touch-pad').setAttribute('aria-valuemax',mode===2?'880':'1760');
  $('screen-name').textContent=['LOOSE GRAIN CHAMBER','CONTINUOUS THEREMIN','LIVE VOCAL ANATOMY'][mode];
- $('screen-detail').textContent=['XYZ','110—1760 HZ','CHIMERA'][mode];
+ $('screen-detail').textContent=['XYZ','110—1760 HZ','CHIMERA'][mode];$('mode-hint').textContent=mode===0?'Shake in any direction.':'Move to breathe · tilt for pitch.';
  $('gesture-caption').textContent=mode===0?'SHAKE IN ANY DIRECTION · DRAG TO RATTLE':mode===1?'SIDE TILT: PITCH · FORWARD / BACK: VOWEL':'MOVE TO BREATHE · TILT FOR PITCH';
  $('description').innerHTML=['A handful of grains.<br>A chamber in your hand.<br>Every movement has a texture.','A continuous voice.<br>No keys. No steps.<br>Just the shape of a gesture.','A living vocal tract.<br>Tongue, lips and breath.<br>Play the anatomy of a voice.'][mode];
  $('voice-credit').textContent=mode===2?'CHIMERA · JAMESON HODGE':'PLAYED BY MOVEMENT';
@@ -134,7 +136,7 @@ function ensureHead(){
  }catch(e){notice('The 3D view is unavailable in this browser. The voice can still play.');console.error(e);}
 }
 function resize(){
- const rect=canvas.getBoundingClientRect(),parent=$('glass');width=parent.clientWidth;height=parent.clientHeight-71;
+ const rect=canvas.getBoundingClientRect(),parent=$('glass');width=parent.clientWidth;height=parent.clientHeight-83;
  const dpr=Math.min(devicePixelRatio,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
  if(gl&&head){gl.setSize(width,height);head.resize(width,height);if(model&&orbit){const p=head.poses(model);head.camera.position.copy(p.home);orbit.target.copy(p.target);orbit.update();}}
 }
@@ -161,7 +163,8 @@ function control(now=performance.now()){
  const pitch=manual?manualX:clamp(.5+Math.asin(clamp(tilt[0],-1,1))/Math.PI*(.5+sensitivity),0,1);
  const vowel=manual?manualY:clamp(.5-tilt[1]*(.7+sensitivity),0,1);
  filteredPitch+=(pitch-filteredPitch)*.35;filteredVowel+=(vowel-filteredVowel)*.35;
- const frequency=heldMidi===null?110*Math.pow(2,filteredPitch*(mode===2?3:4)):Math.min(mode===2?880:1760,noteFrequency(heldMidi));
+ let frequency=heldMidi===null?110*Math.pow(2,filteredPitch*(mode===2?3:4)):Math.min(mode===2?880:1760,noteFrequency(heldMidi));
+ if(scaleEnabled&&mode!==0){lastSnapped=nearestAllowedNote(frequency,allowedNotes,mode===2?880:1760,heldMidi??lastSnapped);frequency=noteFrequency(lastSnapped);}else lastSnapped=null;
  return {frequency,vowel:filteredVowel,breath:clamp(.55-acceleration[2]*.65,.05,1),excitation:mode===2?(sensorPermission&&lastSensor>0&&now-lastSensor<1500?motionExcitation.value(now,sensitivity):Math.max(now<pulseUntil?.65:0,touchExcitation*Math.exp(-Math.max(0,now-touchExcitationAt)/85))):undefined};
 }
 function send(force:boolean){if(!node)return;const now=performance.now();if(!force&&now-lastSent<9)return;lastSent=now;
@@ -215,7 +218,7 @@ function frame(now:number){requestAnimationFrame(frame);const dt=Math.min(.05,(n
  if(Math.floor(now/100)!==Math.floor((now-dt*1000)/100)){
   status();
   const c=lastControl;const shown=playing?actualFrequency:c.frequency;const note=pitchNote(shown);const currentOctave=Math.max(2,Math.min(mode===2?5:6,Math.floor(note.midi/12)-1));if(mode!==0&&playing&&heldMidi===null&&!noteBrowse&&currentOctave!==noteOctave){noteOctave=currentOctave;renderNoteGrid();}$('note-value').textContent=mode===0?'':`${note.label} ${note.cents>0?'+':''}${note.cents}¢`;
-  document.querySelectorAll<HTMLButtonElement>('[data-note]').forEach(b=>{const active=Number(b.dataset.note)===note.midi;b.classList.toggle('sounding',playing&&active);b.setAttribute('aria-current',playing&&active?'true':'false');});
+  document.querySelectorAll<HTMLButtonElement>('[data-note]').forEach(b=>{const active=Number(b.dataset.note)===pitchNote(scaleEnabled?c.frequency:shown).midi;b.classList.toggle('sounding',playing&&active&&(mode!==2||(c.excitation??0)>.005));b.setAttribute('aria-current',playing&&active?'true':'false');});
   $('xy-value').textContent=mode===0?`${Math.round(tilt[0]*99).toString().padStart(2,'0')} / ${Math.round(tilt[1]*99).toString().padStart(2,'0')}`:`${Math.round(shown)} HZ`;
   $('energy-value').textContent=mode===0?String(Math.round(energy*127)).padStart(3,'0'):mode===1&&synthVoice!==0?String(Math.round(c.vowel*127)).padStart(3,'0'):['OO','OO–AH','AH','AH–EE','EE'][Math.min(4,Math.floor(c.vowel*5))];
   $('z-value').textContent=String(Math.round((mode===0?Math.abs(acceleration[2]):mode===2?(c.excitation??0):c.breath)*100)).padStart(3,'0');
@@ -229,23 +232,45 @@ const motionButton=document.createElement('button');motionButton.textContent='En
 
 function updateHeld(){
  $('follow-motion').disabled=heldMidi===null&&!noteBrowse;
- $('note-help').textContent=heldMidi===null?'Tilt or drag freely. Tap a note to hold its pitch.':`Holding ${pitchNote(noteFrequency(heldMidi)).label}. Move to breathe. “Follow motion” releases pitch.`;
- document.querySelectorAll<HTMLButtonElement>('[data-note]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.note)===heldMidi)));
+ $('note-help').textContent=editingNotes?'Tap pitches to allow or block. Applies in every octave.':heldMidi!==null?`Holding ${pitchNote(noteFrequency(heldMidi)).label} · move to breathe.`:scaleEnabled?'Pitch follows the enabled scale notes.':'Continuous pitch · tap a note to hold.';
+ document.querySelectorAll<HTMLButtonElement>('[data-note]').forEach(b=>b.setAttribute('aria-pressed',String(editingNotes?allowedNotes.has(pitchClass(Number(b.dataset.note))):Number(b.dataset.note)===heldMidi)));
 }
 function renderNoteGrid(){
  const max=mode===2?880:1760;noteOctave=Math.max(2,Math.min(mode===2?5:6,noteOctave));
- const grid=$('note-grid');grid.replaceChildren();
- for(const midi of octaveNotes(noteOctave,max)){
-  const button=document.createElement('button');button.type='button';button.dataset.note=String(midi);button.textContent=pitchNote(noteFrequency(midi)).label;
-  button.setAttribute('aria-label',`Play ${button.textContent}, ${noteFrequency(midi).toFixed(1)} hertz`);
+ const grid=$('note-grid');grid.replaceChildren();grid.hidden=!notesVisible;
+ $('show-notes').setAttribute('aria-pressed',String(notesVisible));$('edit-notes').setAttribute('aria-pressed',String(editingNotes));$('edit-notes').textContent=editingNotes?'Done':'Edit';$('edit-notes').setAttribute('aria-label',editingNotes?'Finish editing notes':'Edit enabled notes');
+ for(const midi of Array.from({length:12},(_,i)=>(noteOctave+1)*12+i)){
+  const button=document.createElement('button'),label=pitchNote(noteFrequency(midi)).label;
+  const inRange=noteFrequency(midi)>=110-1e-6&&noteFrequency(midi)<=max+1e-6,allowed=!scaleEnabled||allowedNotes.has(pitchClass(midi));
+  button.type='button';button.dataset.note=String(midi);button.textContent=label;button.classList.toggle('excluded',!allowed);button.classList.toggle('outside-range',!inRange);button.disabled=!editingNotes&&(!inRange||!allowed);
+  button.setAttribute('aria-label',editingNotes?`${allowedNotes.has(pitchClass(midi))?'Exclude':'Include'} ${label.replace(/-?\d+$/,'')} in every octave`:`${allowed?'Play':'Excluded'} ${label}, ${noteFrequency(midi).toFixed(1)} hertz`);
   button.addEventListener('click',async()=>{
+   if(editingNotes){
+    if(!scaleEnabled){allowedNotes=scaleNotes(0,'chromatic');scaleEnabled=true;$<HTMLInputElement>('scale-enabled').checked=true;}
+    const pc=pitchClass(midi);if(allowedNotes.has(pc)){if(allowedNotes.size===1){notice('Keep at least one pitch enabled.');return;}allowedNotes.delete(pc);}else allowedNotes.add(pc);
+    scalePreset='custom';$<HTMLSelectElement>('scale-preset').value='custom';applyScale();return;
+   }
+   if(!inRange||!allowed)return;
    if(!node){await begin(sensorPermission);if(!node)return;}else await audio?.resume();
-   heldMidi=midi;if(!sensorPermission||!lastSensor||performance.now()-lastSensor>1500)pulseUntil=performance.now()+220;playing=true;filteredPitch=manualX=Math.log2(noteFrequency(midi)/110)/(mode===2?3:4);updateHeld();status();send(true);
+   heldMidi=midi;lastSnapped=midi;if(!sensorPermission||!lastSensor||performance.now()-lastSensor>1500)pulseUntil=performance.now()+220;playing=true;filteredPitch=manualX=Math.log2(noteFrequency(midi)/110)/(mode===2?3:4);updateHeld();status();send(true);
   });grid.appendChild(button);
  }
- $('note-octave').textContent=`OCTAVE ${noteOctave}`;
+ $('note-octave').textContent=String(noteOctave);
  $<HTMLButtonElement>('octave-down').disabled=noteOctave===2;$<HTMLButtonElement>('octave-up').disabled=noteOctave===(mode===2?5:6);updateHeld();
 }
+function applyScale(){
+ lastSnapped=null;if(scaleEnabled&&heldMidi!==null)heldMidi=nearestAllowedNote(noteFrequency(heldMidi),allowedNotes,mode===2?880:1760);
+ renderNoteGrid();send(true);
+}
+$('scale-enabled').addEventListener('change',()=>{scaleEnabled=$<HTMLInputElement>('scale-enabled').checked;if(!scaleEnabled)editingNotes=false;applyScale();});
+$('scale-root').addEventListener('change',()=>{
+ const next=Number($<HTMLSelectElement>('scale-root').value);allowedNotes=scalePreset==='custom'?new Set([...allowedNotes].map(pc=>(pc+next-scaleRoot+12)%12)):scaleNotes(next,scalePreset);scaleRoot=next;applyScale();
+});
+$('scale-preset').addEventListener('change',()=>{scalePreset=$<HTMLSelectElement>('scale-preset').value;allowedNotes=scaleNotes(scaleRoot,scalePreset);applyScale();});
+$('show-notes').addEventListener('click',()=>{notesVisible=!notesVisible;if(!notesVisible)editingNotes=false;renderNoteGrid();});
+$('edit-notes').addEventListener('click',()=>{editingNotes=!editingNotes;if(editingNotes){notesVisible=true;if(!scaleEnabled){scaleEnabled=true;allowedNotes=scaleNotes(0,'chromatic');scalePreset='custom';$<HTMLInputElement>('scale-enabled').checked=true;$<HTMLSelectElement>('scale-preset').value='custom';}}applyScale();});
+$('more-open').addEventListener('click',()=>$<HTMLDialogElement>('more-dialog').showModal());
+$('more-close').addEventListener('click',()=>$<HTMLDialogElement>('more-dialog').close());
 $('octave-down').addEventListener('click',()=>{noteBrowse=true;noteOctave--;renderNoteGrid();});
 $('octave-up').addEventListener('click',()=>{noteBrowse=true;noteOctave++;renderNoteGrid();});
 $('follow-motion').addEventListener('click',()=>{heldMidi=null;noteBrowse=false;updateHeld();send(true);});
@@ -253,4 +278,4 @@ initUsage();
 
 setMode(2);
 
-initCommunity(()=>({instrument:["Shaker","Synth","CHIMERA"][mode],voice:mode===1?SYNTH_VOICES[synthVoice].name:mode===2?"CHIMERA":"Shaker",sensitivity:Math.round(sensitivity*100),shape:chamber.shape,grainCount:chamber.count}),()=>{playing=false;send(true);status();});
+initCommunity(()=>({instrument:["Shaker","Synth","CHIMERA"][mode],voice:mode===1?SYNTH_VOICES[synthVoice].name:mode===2?"CHIMERA":"Shaker",sensitivity:Math.round(sensitivity*100),shape:chamber.shape,grainCount:chamber.count}),()=>{$<HTMLDialogElement>('more-dialog').close();playing=false;send(true);status();});

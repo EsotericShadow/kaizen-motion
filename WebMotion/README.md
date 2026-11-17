@@ -31,3 +31,11 @@ Usage privacy is off by default. Opting in creates a random browser ID with a 90
 Check note/clock behaviour with `bun tests/notes-usage.ts` and consent/ID behaviour with `bun tests/usage-consent.ts`. Backend and private report source live in the Kaizen website repository.
 
 CHIMERA excitation follows phone motion speed (web beta 06). Gravity-free acceleration feeds a short-term damped velocity estimate; angular velocity also excites turning gestures. Speed in either direction drives source pressure, with smooth attack/release and zero pressure at rest/stale input. Sensitivity adjusts the response. There is no static excitation slider or constant-breath mode. The meter displays movement-driven excitation. Desktop touch fallback uses drag speed; tapping a note gives a short preview rather than a sustained breath. Note holds still select pitch independently of movement. Linear speed is an IMU estimate, not position tracking or a calibrated velocity measurement.
+
+## Fixed performance screen and scales (web beta 07)
+
+The performance frame fits the viewport, with a transparent note grid over the CHIMERA head / synth display. Essential controls keep the same positions across instruments. Secondary links, feedback, beta access, advanced chamber controls and usage privacy are in More.
+
+Scale enables pitch constraints. Choose a root and major, natural minor, major/minor pentatonic, Dorian or chromatic. Motion and touch pitch targets use the enabled notes; turning Scale off restores continuous pitch. Edit toggles pitch classes across every octave, selects Custom notes and keeps at least one pitch enabled. Done returns to playing. Notes hides/shows the overlay independently of the active scale. Pitch choices occupy the same cells in every octave, with out-of-range pitches disabled for playback. Tiny boundary hysteresis avoids sensor jitter between neighboring targets. Existing source glide/smoothing remains.
+
+`bun tests/scales.ts` checks every root, preset and playable range, edited masks and boundary behavior. Browser layout/interaction proof is recorded separately from physical phone acceptance.
