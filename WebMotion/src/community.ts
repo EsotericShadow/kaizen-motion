@@ -9,7 +9,7 @@ export function initCommunity(details:InstrumentDetails,onOpen:()=>void){
   form.addEventListener('submit',async event=>{
    event.preventDefault();if(!form.reportValidity())return;
    const data=new FormData(form),button=form.querySelector<HTMLButtonElement>('[type=submit]')!;
-   const body:Record<string,unknown>={email:String(data.get('email')||''),website:String(data.get('website')||''),version:'web-07'};
+   const body:Record<string,unknown>={email:String(data.get('email')||''),website:String(data.get('website')||''),version:'web-08'};
    if(name==='beta'){
     const platforms=data.getAll('platform');if(!platforms.length){status.textContent='Choose at least one platform.';return;}
     Object.assign(body,{name:String(data.get('name')||''),platforms,consent:data.get('consent')==='on'});

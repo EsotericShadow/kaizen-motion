@@ -17,3 +17,15 @@ export function nearestAllowedNote(frequency:number,allowed:ReadonlySet<number>,
  if(previous!==null&&previous>=45&&noteFrequency(previous)<=maxFrequency+1e-6&&allowed.has(pitchClass(previous))&&Math.abs(previous-exact)<=distance+.08)return previous;
  return best;
 }
+/** A deliberate note hold is separate from scale constraints on moving pitch. */
+export class PitchSelection{
+ held:number|null=null;previous:number|null=null;
+ hold(midi:number){this.held=midi;this.previous=midi;}
+ followMotion(){this.held=null;this.previous=null;}
+ frequency(movingFrequency:number,scaleEnabled:boolean,allowed:ReadonlySet<number>,maxFrequency:number){
+  const target=this.held===null?movingFrequency:Math.min(maxFrequency,noteFrequency(this.held));
+  if(!scaleEnabled){this.previous=null;return target;}
+  this.previous=nearestAllowedNote(target,allowed,maxFrequency,this.held??this.previous);
+  return noteFrequency(this.previous);
+ }
+}

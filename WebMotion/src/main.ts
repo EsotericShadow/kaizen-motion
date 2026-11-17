@@ -6,8 +6,9 @@ import { NEUTRAL } from './neutral';
 import { GrainChamber, Grip, clamp } from './physics';
 import { SYNTH_VOICES } from './synth';
 import { initCommunity } from './community';
-import { noteFrequency, pitchNote, scaleNotes, nearestAllowedNote, pitchClass } from './notes';
+import { noteFrequency, pitchNote, scaleNotes, pitchClass, PitchSelection } from './notes';
 import { initUsage } from './usage';
+import { initPerformanceViewport } from './viewport';
 import { MotionExcitation } from './motion-excitation';
 
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
@@ -25,8 +26,9 @@ const gravityEstimate=[0,-9.80665,0];let lastMotionTime=0;
 let filteredPitch=.5,filteredVowel=.5,sensorPermission=false,firstSensor=true,gestureTime=0;
 let width=360,height=240,activePointer=false,lastPoint:any=null,orientationZero:number|null=null,rawGamma=0;
 let transferPointer:number|undefined;
-let heldMidi:number|null=null,noteOctave=4,noteBrowse=false,actualFrequency=311;
-let scaleEnabled=false,scaleRoot=0,scalePreset='major',allowedNotes=scaleNotes(0,'major'),lastSnapped:number|null=null,notesVisible=true,editingNotes=false;
+const pitchSelection=new PitchSelection();
+let noteOctave=4,noteBrowse=false,actualFrequency=311;
+let scaleEnabled=false,scaleRoot=0,scalePreset='major',allowedNotes=scaleNotes(0,'major'),notesVisible=true,editingNotes=false;
 const motionExcitation=new MotionExcitation();
 let touchExcitation=0,touchExcitationAt=-Infinity;
 let lastControl:{frequency:number;vowel:number;breath:number;excitation?:number}={frequency:311,vowel:.5,breath:.55};
@@ -91,12 +93,12 @@ async function begin(motion:boolean){
 }
 startButton.addEventListener('click',()=>begin(true));touchStart.addEventListener('click',()=>begin(false));
 pause.addEventListener('click',async()=>{if(!audio)return;await audio.resume();playing=!playing;status();send(true);});
-$('centre').addEventListener('click',()=>{motionExcitation.reset();heldMidi=null;noteBrowse=false;updateHeld();grip.center(gravity);orientationZero=rawGamma;manualX=manualY=.5;filteredPitch=filteredVowel=.5;notice('Centred on this grip.');});
-$('test').addEventListener('click',async()=>{heldMidi=null;updateHeld();if(!node){await begin(false);if(!node)return;}if(audio?.state!=='running')await audio?.resume();playing=true;manualX=.5;manualY=.5;touchedUntil=performance.now()+1000;pulseUntil=performance.now()+220;gestureTime=performance.now();status();send(true);});
+$('centre').addEventListener('click',()=>{motionExcitation.reset();pitchSelection.held=null;noteBrowse=false;updateHeld();grip.center(gravity);orientationZero=rawGamma;manualX=manualY=.5;filteredPitch=filteredVowel=.5;notice('Centred on this grip.');});
+$('test').addEventListener('click',async()=>{pitchSelection.held=null;updateHeld();if(!node){await begin(false);if(!node)return;}if(audio?.state!=='running')await audio?.resume();playing=true;manualX=.5;manualY=.5;touchedUntil=performance.now()+1000;pulseUntil=performance.now()+220;gestureTime=performance.now();status();send(true);});
 $('sensitivity').addEventListener('input',e=>{sensitivity=Number((e.target as HTMLInputElement).value)/100;$('sensitivity-output').textContent=String(Math.round(sensitivity*100)).padStart(2,'0');});
 document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(Number(b.dataset.mode))));
 function setMode(next:number){
- mode=next;motionExcitation.reset();touchExcitation=0;touchExcitationAt=-Infinity;if(heldMidi!==null&&noteFrequency(heldMidi)>(mode===2?880:1760))heldMidi=null;effort=0;pulseUntil=0;chamber.reset(chamber.count);
+ mode=next;motionExcitation.reset();touchExcitation=0;touchExcitationAt=-Infinity;if(pitchSelection.held!==null&&noteFrequency(pitchSelection.held)>(mode===2?880:1760))pitchSelection.held=null;effort=0;pulseUntil=0;chamber.reset(chamber.count);
  document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach(b=>{const selected=Number(b.dataset.mode)===mode;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
  $('excitation-controls').hidden=mode!==2;
  $('note-panel').hidden=mode===0;$('shaker-options').hidden=mode!==0;$('note-plane').hidden=mode===0;$('mode-hint').hidden=mode===1;renderNoteGrid();
@@ -163,15 +165,14 @@ function control(now=performance.now()){
  const pitch=manual?manualX:clamp(.5+Math.asin(clamp(tilt[0],-1,1))/Math.PI*(.5+sensitivity),0,1);
  const vowel=manual?manualY:clamp(.5-tilt[1]*(.7+sensitivity),0,1);
  filteredPitch+=(pitch-filteredPitch)*.35;filteredVowel+=(vowel-filteredVowel)*.35;
- let frequency=heldMidi===null?110*Math.pow(2,filteredPitch*(mode===2?3:4)):Math.min(mode===2?880:1760,noteFrequency(heldMidi));
- if(scaleEnabled&&mode!==0){lastSnapped=nearestAllowedNote(frequency,allowedNotes,mode===2?880:1760,heldMidi??lastSnapped);frequency=noteFrequency(lastSnapped);}else lastSnapped=null;
+ const frequency=pitchSelection.frequency(110*Math.pow(2,filteredPitch*(mode===2?3:4)),scaleEnabled&&mode!==0,allowedNotes,mode===2?880:1760);
  return {frequency,vowel:filteredVowel,breath:clamp(.55-acceleration[2]*.65,.05,1),excitation:mode===2?(sensorPermission&&lastSensor>0&&now-lastSensor<1500?motionExcitation.value(now,sensitivity):Math.max(now<pulseUntil?.65:0,touchExcitation*Math.exp(-Math.max(0,now-touchExcitationAt)/85))):undefined};
 }
 function send(force:boolean){if(!node)return;const now=performance.now();if(!force&&now-lastSent<9)return;lastSent=now;
  const c=control(now);lastControl=c;node.port.postMessage({type:'state',mode,voice:synthVoice,enabled:playing,...c,acceleration:acceleration.map(x=>x*(.45+sensitivity*1.55)),tilt,pulse:now<pulseUntil});
 }
 function pointerMove(event:PointerEvent){
- heldMidi=null;updateHeld();
+ pitchSelection.held=null;updateHeld();
  const area=event.currentTarget as HTMLElement,rect=area.getBoundingClientRect(),x=clamp((event.clientX-rect.left)/rect.width,0,1),y=clamp((event.clientY-rect.top)/rect.height,0,1),now=performance.now();
  manualX=x;manualY=1-y;touchedUntil=now+2000;gestureTime=now;
  if(mode===2&&(!sensorPermission||!lastSensor||now-lastSensor>1500)){
@@ -188,7 +189,7 @@ for(const element of [canvas,$('touch-pad')]){
  element.addEventListener('pointermove',(e:any)=>{if(activePointer)pointerMove(e);});
  const end=()=>{activePointer=false;lastPoint=null;};element.addEventListener('pointerup',end);element.addEventListener('pointercancel',end);
 }
-$('touch-pad').addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();heldMidi=null;updateHeld();manualX=clamp(manualX+(e.key==='ArrowRight'?.025:e.key==='ArrowLeft'?-.025:0),0,1);manualY=clamp(manualY+(e.key==='ArrowUp'?.05:e.key==='ArrowDown'?-.05:0),0,1);touchedUntil=performance.now()+3000;$('touch-pad').setAttribute('aria-valuenow',String(Math.round(110*Math.pow(2,manualX*(mode===2?3:4)))));send(true);}});
+$('touch-pad').addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();pitchSelection.held=null;updateHeld();manualX=clamp(manualX+(e.key==='ArrowRight'?.025:e.key==='ArrowLeft'?-.025:0),0,1);manualY=clamp(manualY+(e.key==='ArrowUp'?.05:e.key==='ArrowDown'?-.05:0),0,1);touchedUntil=performance.now()+3000;$('touch-pad').setAttribute('aria-valuenow',String(Math.round(110*Math.pow(2,manualX*(mode===2?3:4)))));send(true);}});
 function geometry(){const size=Number($<HTMLInputElement>('size').value)/1000;chamber.shape=$<HTMLSelectElement>('shape').value;chamber.w=size;chamber.h=chamber.shape==='circle'?size:chamber.shape==='oval'?size*.62:size*1.12;chamber.radius=Number($<HTMLInputElement>('grain-size').value)/2000;chamber.reset(Number($<HTMLInputElement>('fill').value));node?.port.postMessage({type:'geometry',shape:chamber.shape,width:chamber.w,height:chamber.h,depth:chamber.d,radius:chamber.radius,count:chamber.count,material:Number($<HTMLSelectElement>('material').value)});}
 for(const id of ['shape','fill','size','grain-size','material'])$(id).addEventListener('input',geometry);
 function draw(now:number,dt:number){
@@ -217,7 +218,7 @@ function frame(now:number){requestAnimationFrame(frame);const dt=Math.min(.05,(n
  if(now-lastSent>30)send(false);
  if(Math.floor(now/100)!==Math.floor((now-dt*1000)/100)){
   status();
-  const c=lastControl;const shown=playing?actualFrequency:c.frequency;const note=pitchNote(shown);const currentOctave=Math.max(2,Math.min(mode===2?5:6,Math.floor(note.midi/12)-1));if(mode!==0&&playing&&heldMidi===null&&!noteBrowse&&currentOctave!==noteOctave){noteOctave=currentOctave;renderNoteGrid();}$('note-value').textContent=mode===0?'':`${note.label} ${note.cents>0?'+':''}${note.cents}¢`;
+  const c=lastControl;const shown=playing?actualFrequency:c.frequency;const note=pitchNote(shown);const currentOctave=Math.max(2,Math.min(mode===2?5:6,Math.floor(note.midi/12)-1));if(mode!==0&&playing&&pitchSelection.held===null&&!noteBrowse&&!editingNotes&&currentOctave!==noteOctave){noteOctave=currentOctave;renderNoteGrid();}$('note-value').textContent=mode===0?'':`${note.label} ${note.cents>0?'+':''}${note.cents}¢`;
   document.querySelectorAll<HTMLButtonElement>('[data-note]').forEach(b=>{const active=Number(b.dataset.note)===pitchNote(scaleEnabled?c.frequency:shown).midi;b.classList.toggle('sounding',playing&&active&&(mode!==2||(c.excitation??0)>.005));b.setAttribute('aria-current',playing&&active?'true':'false');});
   $('xy-value').textContent=mode===0?`${Math.round(tilt[0]*99).toString().padStart(2,'0')} / ${Math.round(tilt[1]*99).toString().padStart(2,'0')}`:`${Math.round(shown)} HZ`;
   $('energy-value').textContent=mode===0?String(Math.round(energy*127)).padStart(3,'0'):mode===1&&synthVoice!==0?String(Math.round(c.vowel*127)).padStart(3,'0'):['OO','OO–AH','AH','AH–EE','EE'][Math.min(4,Math.floor(c.vowel*5))];
@@ -231,9 +232,9 @@ $('share').addEventListener('click',async()=>{try{const url=location.origin+loca
 const motionButton=document.createElement('button');motionButton.textContent='Enable motion';motionButton.addEventListener('click',async()=>{sensorPermission=await requestMotion().catch(()=>false);motionExcitation.reset();firstSensor=true;notice(sensorPermission?'Motion enabled. Hold comfortably and tap CENTRE.':'Motion permission is unavailable here. Open in Safari/Chrome or keep playing with touch.');status();});document.querySelector('footer nav')?.appendChild(motionButton);
 
 function updateHeld(){
- $('follow-motion').disabled=heldMidi===null&&!noteBrowse;
- $('note-help').textContent=editingNotes?'Tap pitches to allow or block. Applies in every octave.':heldMidi!==null?`Holding ${pitchNote(noteFrequency(heldMidi)).label} · move to breathe.`:scaleEnabled?'Pitch follows the enabled scale notes.':'Continuous pitch · tap a note to hold.';
- document.querySelectorAll<HTMLButtonElement>('[data-note]').forEach(b=>b.setAttribute('aria-pressed',String(editingNotes?allowedNotes.has(pitchClass(Number(b.dataset.note))):Number(b.dataset.note)===heldMidi)));
+ $('follow-motion').disabled=pitchSelection.held===null&&!noteBrowse;
+ $('note-help').textContent=editingNotes?'Tap pitches to allow or block. Applies in every octave.':pitchSelection.held!==null?`Holding ${pitchNote(noteFrequency(pitchSelection.held)).label} · move to breathe.`:scaleEnabled?'Pitch follows the enabled scale notes.':'Continuous pitch · tap a note to hold.';
+ document.querySelectorAll<HTMLButtonElement>('[data-note]').forEach(b=>b.setAttribute('aria-pressed',String(editingNotes?allowedNotes.has(pitchClass(Number(b.dataset.note))):Number(b.dataset.note)===pitchSelection.held)));
 }
 function renderNoteGrid(){
  const max=mode===2?880:1760;noteOctave=Math.max(2,Math.min(mode===2?5:6,noteOctave));
@@ -252,14 +253,15 @@ function renderNoteGrid(){
    }
    if(!inRange||!allowed)return;
    if(!node){await begin(sensorPermission);if(!node)return;}else await audio?.resume();
-   heldMidi=midi;lastSnapped=midi;if(!sensorPermission||!lastSensor||performance.now()-lastSensor>1500)pulseUntil=performance.now()+220;playing=true;filteredPitch=manualX=Math.log2(noteFrequency(midi)/110)/(mode===2?3:4);updateHeld();status();send(true);
+   pitchSelection.hold(midi);if(!sensorPermission||!lastSensor||performance.now()-lastSensor>1500)pulseUntil=performance.now()+220;playing=true;filteredPitch=manualX=Math.log2(noteFrequency(midi)/110)/(mode===2?3:4);updateHeld();status();send(true);
   });grid.appendChild(button);
  }
  $('note-octave').textContent=String(noteOctave);
  $<HTMLButtonElement>('octave-down').disabled=noteOctave===2;$<HTMLButtonElement>('octave-up').disabled=noteOctave===(mode===2?5:6);updateHeld();
 }
 function applyScale(){
- lastSnapped=null;if(scaleEnabled&&heldMidi!==null)heldMidi=nearestAllowedNote(noteFrequency(heldMidi),allowedNotes,mode===2?880:1760);
+ // Changing constraints must never latch a previous touch preview or override sensors.
+ pitchSelection.followMotion();touchedUntil=0;noteBrowse=false;
  renderNoteGrid();send(true);
 }
 $('scale-enabled').addEventListener('change',()=>{scaleEnabled=$<HTMLInputElement>('scale-enabled').checked;if(!scaleEnabled)editingNotes=false;applyScale();});
@@ -273,8 +275,9 @@ $('more-open').addEventListener('click',()=>$<HTMLDialogElement>('more-dialog').
 $('more-close').addEventListener('click',()=>$<HTMLDialogElement>('more-dialog').close());
 $('octave-down').addEventListener('click',()=>{noteBrowse=true;noteOctave--;renderNoteGrid();});
 $('octave-up').addEventListener('click',()=>{noteBrowse=true;noteOctave++;renderNoteGrid();});
-$('follow-motion').addEventListener('click',()=>{heldMidi=null;noteBrowse=false;updateHeld();send(true);});
+$('follow-motion').addEventListener('click',()=>{pitchSelection.followMotion();touchedUntil=0;noteBrowse=false;updateHeld();send(true);});
 initUsage();
+initPerformanceViewport();
 
 setMode(2);
 

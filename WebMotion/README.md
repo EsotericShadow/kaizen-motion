@@ -39,3 +39,9 @@ The performance frame fits the viewport, with a transparent note grid over the C
 Scale enables pitch constraints. Choose a root and major, natural minor, major/minor pentatonic, Dorian or chromatic. Motion and touch pitch targets use the enabled notes; turning Scale off restores continuous pitch. Edit toggles pitch classes across every octave, selects Custom notes and keeps at least one pitch enabled. Done returns to playing. Notes hides/shows the overlay independently of the active scale. Pitch choices occupy the same cells in every octave, with out-of-range pitches disabled for playback. Tiny boundary hysteresis avoids sensor jitter between neighboring targets. Existing source glide/smoothing remains.
 
 `bun tests/scales.ts` checks every root, preset and playable range, edited masks and boundary behavior. Browser layout/interaction proof is recorded separately from physical phone acceptance.
+
+## Embedded browser fit and pitch follow (web beta 08)
+
+The frame follows the smallest reported visual/layout viewport and updates on viewport resize, scroll and page return. Controls use 16px text in iOS selectors to avoid focus zoom. The page leaves a vertical scroll escape for extremely short hosts. More → Compact browser view is a per-tab functional preference for browsers that cover content without reporting their visible bounds; it does not create an analytics identifier.
+
+Changing a scale, root, preset or excluded pitch releases any prior tapped-note hold and temporary touch override. Motion immediately resumes driving pitch within the allowed set. A deliberate note tap can still hold a pitch; Follow motion releases it. `bun tests/pitch-viewport.ts` exercises the previous hold/freeze case plus partial visual viewport bounds. Real X/iOS behavior still requires phone confirmation.
