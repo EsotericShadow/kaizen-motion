@@ -6,6 +6,8 @@ import { NEUTRAL } from './neutral';
 import { GrainChamber, Grip, clamp } from './physics';
 import { SYNTH_VOICES } from './synth';
 import { initCommunity } from './community';
+import { noteFrequency, pitchNote, octaveNotes } from './notes';
+import { initUsage } from './usage';
 
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const canvas=$<HTMLCanvasElement>('field'),ctx=canvas.getContext('2d')!;
@@ -22,6 +24,9 @@ const gravityEstimate=[0,-9.80665,0];let lastMotionTime=0;
 let filteredPitch=.5,filteredVowel=.5,sensorPermission=false,firstSensor=true,gestureTime=0;
 let width=360,height=240,activePointer=false,lastPoint:any=null,orientationZero:number|null=null,rawGamma=0;
 let transferPointer:number|undefined;
+let heldMidi:number|null=null,noteOctave=4,noteBrowse=false,actualFrequency=311;
+let excitationMotion=true,excitationLevel=.7;
+let lastControl:{frequency:number;vowel:number;breath:number;excitation?:number}={frequency:311,vowel:.5,breath:.55};
 startButton.disabled=touchStart.disabled=true;
 const resources=(async()=>{
  await initChimera('./chimera.wasm');
@@ -61,6 +66,7 @@ async function begin(motion:boolean){
   node=new AudioWorkletNode(audio,'motion-audio',{numberOfInputs:0,numberOfOutputs:1,outputChannelCount:[2],processorOptions:{module:chimeraModule(),pcm,shakerBank,vowels}});
   node.onprocessorerror=()=>{playing=false;status();notice('The audio engine stopped. Reload to restart it.');};
   node.port.onmessage=e=>{
+   if(Number.isFinite(e.data.frequency)&&e.data.frequency>0)actualFrequency=e.data.frequency;
    if(e.data.type==='scope'){scope=e.data.values;scopeWrite=e.data.writeIndex;}
    if(e.data.type==='artic'){for(let i=0;i<keys.length;i++)artic[keys[i]]=e.data.values[i];}
    if(e.data.type==='grains'){
@@ -81,13 +87,15 @@ async function begin(motion:boolean){
 }
 startButton.addEventListener('click',()=>begin(true));touchStart.addEventListener('click',()=>begin(false));
 pause.addEventListener('click',async()=>{if(!audio)return;await audio.resume();playing=!playing;status();send(true);});
-$('centre').addEventListener('click',()=>{grip.center(gravity);orientationZero=rawGamma;manualX=manualY=.5;filteredPitch=filteredVowel=.5;notice('Centred on this grip.');});
-$('test').addEventListener('click',async()=>{if(!node){await begin(false);if(!node)return;}if(audio?.state!=='running')await audio?.resume();playing=true;manualX=.5;manualY=.5;touchedUntil=performance.now()+1000;pulseUntil=performance.now()+220;gestureTime=performance.now();status();send(true);});
+$('centre').addEventListener('click',()=>{heldMidi=null;noteBrowse=false;updateHeld();grip.center(gravity);orientationZero=rawGamma;manualX=manualY=.5;filteredPitch=filteredVowel=.5;notice('Centred on this grip.');});
+$('test').addEventListener('click',async()=>{heldMidi=null;updateHeld();if(!node){await begin(false);if(!node)return;}if(audio?.state!=='running')await audio?.resume();playing=true;manualX=.5;manualY=.5;touchedUntil=performance.now()+1000;pulseUntil=performance.now()+220;gestureTime=performance.now();status();send(true);});
 $('sensitivity').addEventListener('input',e=>{sensitivity=Number((e.target as HTMLInputElement).value)/100;$('sensitivity-output').textContent=String(Math.round(sensitivity*100)).padStart(2,'0');});
 document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(Number(b.dataset.mode))));
 function setMode(next:number){
- mode=next;effort=0;pulseUntil=0;chamber.reset(chamber.count);
+ mode=next;if(heldMidi!==null&&noteFrequency(heldMidi)>(mode===2?880:1760))heldMidi=null;effort=0;pulseUntil=0;chamber.reset(chamber.count);
  document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach(b=>{const selected=Number(b.dataset.mode)===mode;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
+ $('excitation-controls').hidden=mode!==2;
+ $('note-panel').hidden=mode===0;renderNoteGrid();
  $('chamber').hidden=mode!==0;$('touch-pad').hidden=mode===0;$('synth-bank').hidden=mode!==1;
  $('touch-pad').setAttribute('aria-valuemax',mode===2?'880':'1760');
  $('screen-name').textContent=['LOOSE GRAIN CHAMBER','CONTINUOUS THEREMIN','LIVE VOCAL ANATOMY'][mode];
@@ -150,13 +158,14 @@ function control(now=performance.now()){
  const pitch=manual?manualX:clamp(.5+Math.asin(clamp(tilt[0],-1,1))/Math.PI*(.5+sensitivity),0,1);
  const vowel=manual?manualY:clamp(.5-tilt[1]*(.7+sensitivity),0,1);
  filteredPitch+=(pitch-filteredPitch)*.35;filteredVowel+=(vowel-filteredVowel)*.35;
- const frequency=110*Math.pow(2,filteredPitch*(mode===2?3:4));
- return {frequency,vowel:filteredVowel,breath:clamp(.55-acceleration[2]*.65,.05,1)};
+ const frequency=heldMidi===null?110*Math.pow(2,filteredPitch*(mode===2?3:4)):Math.min(mode===2?880:1760,noteFrequency(heldMidi));
+ return {frequency,vowel:filteredVowel,breath:clamp(.55-acceleration[2]*.65,.05,1),excitation:mode===2&&!excitationMotion?excitationLevel:undefined};
 }
 function send(force:boolean){if(!node)return;const now=performance.now();if(!force&&now-lastSent<9)return;lastSent=now;
- const c=control(now);node.port.postMessage({type:'state',mode,voice:synthVoice,enabled:playing,...c,acceleration:acceleration.map(x=>x*(.45+sensitivity*1.55)),tilt,pulse:now<pulseUntil});
+ const c=control(now);lastControl=c;node.port.postMessage({type:'state',mode,voice:synthVoice,enabled:playing,...c,acceleration:acceleration.map(x=>x*(.45+sensitivity*1.55)),tilt,pulse:now<pulseUntil});
 }
 function pointerMove(event:PointerEvent){
+ heldMidi=null;updateHeld();
  const area=event.currentTarget as HTMLElement,rect=area.getBoundingClientRect(),x=clamp((event.clientX-rect.left)/rect.width,0,1),y=clamp((event.clientY-rect.top)/rect.height,0,1),now=performance.now();
  manualX=x;manualY=1-y;touchedUntil=now+2000;gestureTime=now;
  if(lastPoint&&mode===0){const dt=Math.max(8,now-lastPoint.t),dx=(x-lastPoint.x)/dt*1000,dy=(y-lastPoint.y)/dt*1000;effort=Math.max(effort,clamp(Math.hypot(dx,dy)*.13,0,1));acceleration=[clamp(dx*.3,-2,2),clamp(-dy*.3,-2,2),0];}
@@ -169,7 +178,7 @@ for(const element of [canvas,$('touch-pad')]){
  element.addEventListener('pointermove',(e:any)=>{if(activePointer)pointerMove(e);});
  const end=()=>{activePointer=false;lastPoint=null;};element.addEventListener('pointerup',end);element.addEventListener('pointercancel',end);
 }
-$('touch-pad').addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();manualX=clamp(manualX+(e.key==='ArrowRight'?.025:e.key==='ArrowLeft'?-.025:0),0,1);manualY=clamp(manualY+(e.key==='ArrowUp'?.05:e.key==='ArrowDown'?-.05:0),0,1);touchedUntil=performance.now()+3000;$('touch-pad').setAttribute('aria-valuenow',String(Math.round(110*Math.pow(2,manualX*(mode===2?3:4)))));send(true);}});
+$('touch-pad').addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();heldMidi=null;updateHeld();manualX=clamp(manualX+(e.key==='ArrowRight'?.025:e.key==='ArrowLeft'?-.025:0),0,1);manualY=clamp(manualY+(e.key==='ArrowUp'?.05:e.key==='ArrowDown'?-.05:0),0,1);touchedUntil=performance.now()+3000;$('touch-pad').setAttribute('aria-valuenow',String(Math.round(110*Math.pow(2,manualX*(mode===2?3:4)))));send(true);}});
 function geometry(){const size=Number($<HTMLInputElement>('size').value)/1000;chamber.shape=$<HTMLSelectElement>('shape').value;chamber.w=size;chamber.h=chamber.shape==='circle'?size:chamber.shape==='oval'?size*.62:size*1.12;chamber.radius=Number($<HTMLInputElement>('grain-size').value)/2000;chamber.reset(Number($<HTMLInputElement>('fill').value));node?.port.postMessage({type:'geometry',shape:chamber.shape,width:chamber.w,height:chamber.h,depth:chamber.d,radius:chamber.radius,count:chamber.count,material:Number($<HTMLSelectElement>('material').value)});}
 for(const id of ['shape','fill','size','grain-size','material'])$(id).addEventListener('input',geometry);
 function draw(now:number,dt:number){
@@ -198,15 +207,44 @@ function frame(now:number){requestAnimationFrame(frame);const dt=Math.min(.05,(n
  if(now-lastSent>30)send(false);
  if(Math.floor(now/100)!==Math.floor((now-dt*1000)/100)){
   status();
-  const c=control(now);$('xy-value').textContent=mode===0?`${Math.round(tilt[0]*99).toString().padStart(2,'0')} / ${Math.round(tilt[1]*99).toString().padStart(2,'0')}`:`${Math.round(c.frequency)} HZ`;
+  const c=lastControl;const shown=playing?actualFrequency:c.frequency;const note=pitchNote(shown);const currentOctave=Math.max(2,Math.min(mode===2?5:6,Math.floor(note.midi/12)-1));if(mode!==0&&playing&&heldMidi===null&&!noteBrowse&&currentOctave!==noteOctave){noteOctave=currentOctave;renderNoteGrid();}$('note-value').textContent=mode===0?'':`${note.label} ${note.cents>0?'+':''}${note.cents}¢`;
+  document.querySelectorAll<HTMLButtonElement>('[data-note]').forEach(b=>{const active=Number(b.dataset.note)===note.midi;b.classList.toggle('sounding',playing&&active);b.setAttribute('aria-current',playing&&active?'true':'false');});
+  $('xy-value').textContent=mode===0?`${Math.round(tilt[0]*99).toString().padStart(2,'0')} / ${Math.round(tilt[1]*99).toString().padStart(2,'0')}`:`${Math.round(shown)} HZ`;
   $('energy-value').textContent=mode===0?String(Math.round(energy*127)).padStart(3,'0'):mode===1&&synthVoice!==0?String(Math.round(c.vowel*127)).padStart(3,'0'):['OO','OO–AH','AH','AH–EE','EE'][Math.min(4,Math.floor(c.vowel*5))];
-  $('z-value').textContent=String(Math.round((mode===0?Math.abs(acceleration[2]):c.breath)*100)).padStart(3,'0');
+  $('z-value').textContent=String(Math.round((mode===0?Math.abs(acceleration[2]):mode===2?(c.excitation??(4+8*c.breath)/12):c.breath)*100)).padStart(3,'0');
+  if(mode===2&&excitationMotion){const level=Math.round((4+8*c.breath)/12*100);$<HTMLInputElement>('excitation').value=String(level);$('excitation-output').textContent=`${level}%`;}
  }
 }
 requestAnimationFrame(frame);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&node){playing=false;send(true);status();audio?.suspend();notice('Sound paused while you were away. Tap ▶ to resume.');}});
 $('share').addEventListener('click',async()=>{try{const url=location.origin+location.pathname;if(navigator.share)await navigator.share({title:'Kaizen Motion',text:'Your phone is an instrument. Shake, tilt, play.',url});else{await navigator.clipboard.writeText(url);notice('Link copied. Share it anywhere.');}}catch(e){if((e as Error).name!=='AbortError')notice('Copy this page’s address to share Motion.');}});
 const motionButton=document.createElement('button');motionButton.textContent='Enable motion';motionButton.addEventListener('click',async()=>{sensorPermission=await requestMotion().catch(()=>false);firstSensor=true;notice(sensorPermission?'Motion enabled. Hold comfortably and tap CENTRE.':'Motion permission is unavailable here. Open in Safari/Chrome or keep playing with touch.');status();});document.querySelector('footer nav')?.appendChild(motionButton);
+
+function updateHeld(){
+ $('follow-motion').disabled=heldMidi===null&&!noteBrowse;
+ $('note-help').textContent=heldMidi===null?'Tilt or drag freely. Tap a note to hold its pitch.':`Holding ${pitchNote(noteFrequency(heldMidi)).label}. Tilt still changes tone. “Follow motion” releases pitch.`;
+ document.querySelectorAll<HTMLButtonElement>('[data-note]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.note)===heldMidi)));
+}
+function renderNoteGrid(){
+ const max=mode===2?880:1760;noteOctave=Math.max(2,Math.min(mode===2?5:6,noteOctave));
+ const grid=$('note-grid');grid.replaceChildren();
+ for(const midi of octaveNotes(noteOctave,max)){
+  const button=document.createElement('button');button.type='button';button.dataset.note=String(midi);button.textContent=pitchNote(noteFrequency(midi)).label;
+  button.setAttribute('aria-label',`Play ${button.textContent}, ${noteFrequency(midi).toFixed(1)} hertz`);
+  button.addEventListener('click',async()=>{
+   if(!node){await begin(false);if(!node)return;}else await audio?.resume();
+   heldMidi=midi;playing=true;filteredPitch=manualX=Math.log2(noteFrequency(midi)/110)/(mode===2?3:4);updateHeld();status();send(true);
+  });grid.appendChild(button);
+ }
+ $('note-octave').textContent=`OCTAVE ${noteOctave}`;
+ $<HTMLButtonElement>('octave-down').disabled=noteOctave===2;$<HTMLButtonElement>('octave-up').disabled=noteOctave===(mode===2?5:6);updateHeld();
+}
+$('octave-down').addEventListener('click',()=>{noteBrowse=true;noteOctave--;renderNoteGrid();});
+$('octave-up').addEventListener('click',()=>{noteBrowse=true;noteOctave++;renderNoteGrid();});
+$('excitation').addEventListener('input',()=>{excitationMotion=false;$<HTMLInputElement>('excitation-motion').checked=false;excitationLevel=Number($<HTMLInputElement>('excitation').value)/100;$('excitation-output').textContent=`${Math.round(excitationLevel*100)}%`;send(true);});
+$('excitation-motion').addEventListener('change',()=>{excitationMotion=$<HTMLInputElement>('excitation-motion').checked;if(!excitationMotion)excitationLevel=Number($<HTMLInputElement>('excitation').value)/100;send(true);});
+$('follow-motion').addEventListener('click',()=>{heldMidi=null;noteBrowse=false;updateHeld();send(true);});
+initUsage();
 
 setMode(2);
 

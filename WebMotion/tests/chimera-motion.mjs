@@ -38,5 +38,11 @@ for(const rate of [32000,44100,48000,96000]){
  // Missing sensor messages must still fade to silence.
  for(let i=0;i<Math.ceil(rate*.6/128);i++){globalThis.currentTime+=128/rate;p.process([],out);}
  assert(out[0][0].every(v=>v===0),'stale state did not silence CHIMERA');
+ function manual(level){let tailPeak=0,energy=0;const blocks=Math.ceil(rate*.8/128);for(let block=0;block<blocks;block++){globalThis.currentTime+=128/rate;if(block%4===0)p.port.onmessage({data:{type:'state',mode:2,enabled:true,frequency:220,vowel:.5,breath:.55,...(level===null?{}:{excitation:level})}});p.process([],out);for(const v of out[0][0]){assert(Number.isFinite(v));energy+=v*v;if(block>blocks-20)tailPeak=Math.max(tailPeak,Math.abs(v));}}return {energy,tailPeak};}
+ assert(manual(1).energy>.1,'manual excitation did not drive the voice');
+ assert(manual(0).tailPeak<.0001,'zero excitation did not stop breath');
+ manual(.25);assert(Math.abs(p.pressure-3)<.001,'manual excitation did not control model pressure');
+ manual(null);assert(Math.abs(p.pressure-8.4)<.001,'motion breath mapping did not resume');
+
 }
-console.log('PASS: CHIMERA pressure slew, moving pitch/vowels, finite stereo audio and stale-state silence at 32/44.1/48/96 kHz.');
+console.log('PASS: CHIMERA pressure slew, manual excitation/zero/motion restore, moving pitch/vowels, finite stereo audio and stale-state silence at 32/44.1/48/96 kHz.');

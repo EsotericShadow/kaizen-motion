@@ -22,6 +22,12 @@ CHIMERA engine/bindings and Anatomy3D are pinned to upstream commit dd6807873012
 
 Synths share continuous X pitch / Y colour. Velvet layers warm sine tones and a sub octave; Glass uses inharmonic additive partials; Orbit uses detuned voices; Reed uses a variable harmonic spectrum. Oscillators preserve phase and voice changes use a short fade. Browser processing, sensor rates and latency still need device testing.
 
-## Public demo and community forms
+## Notes and optional usage counts (web beta 05)
 
-Play at https://kaizendsp.com/motion. The branded route serves these public static assets. Send feedback and Join the beta pause the instrument and open accessible forms. The forms submit to the Kaizen website API and acknowledge only successful storage; beta requests require explicit Motion-only email consent and do not automatically send mail or grant TestFlight access. Optional feedback details include selected settings and browser version, never raw motion or audio. The website backend and owner-only inbox are maintained in the Kaizen website repository. Forks should configure their own backend in `src/community.ts` before collecting submissions.
+The pitch readout includes the nearest A440 note and cents, from worklet pitch telemetry. The chromatic note matrix has octave selection; tapping a note holds its exact target pitch while vowel/colour still responds. Follow motion, the touch pad or Centre releases the hold. Continuous playing is not quantized.
+
+Usage privacy is off by default. Opting in creates a random browser ID with a 90-day lifetime and a separate tab-session ID. Repeat visits can be deduplicated by browser; these are not unique people. Only hashed random IDs, session start/update times and visible duration reach the separate usage table. No IP, user agent, fingerprint, location, referrer, query string, note, motion, audio or signup data is sent in the usage payload. Time hidden is excluded; a session restarts after 30 minutes away (or four hours of visible time). Turning it off stops reporting and clears local IDs; another tab’s withdrawal also stops reporting. Records expire after 90 days with daily cleanup. The owner report is at https://kaizendsp.com/ops/motion. Hosting infrastructure still handles normal web requests.
+
+Check note/clock behaviour with `bun tests/notes-usage.ts` and consent/ID behaviour with `bun tests/usage-consent.ts`. Backend and private report source live in the Kaizen website repository.
+
+CHIMERA also has a Breath / excitation slider. Dragging it switches to manual pressure (0–12 cm H2O); zero gates breath off. Motion controls breath restores the original Z-acceleration pressure mapping. Pressure changes retain the 25 ms audio-clock smoothing, rather than changing output gain.
