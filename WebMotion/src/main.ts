@@ -84,7 +84,7 @@ async function begin(motion:boolean){
   const output=audio.createGain();output.gain.value=.8;node.connect(output);output.connect(audio.destination);
   geometry();playing=true;$('welcome').hidden=true;$('gesture-caption').hidden=false;
   if(sensorPermission){firstSensor=true;grip.x=null;notice('Hold comfortably and tap CENTRE. Move to breathe; faster movement gives stronger excitation. Stop to fall silent.');}
-  else notice(motion?'Motion is unavailable or permission was declined. Drag to play; try opening this link in Safari or Chrome.':'Drag across the display to play. On a phone, tap “Enable motion” below to use its sensors.');
+  else notice(motion?'Motion is unavailable or permission was declined. Drag to play; try opening this link in Safari or Chrome.':'Drag across the display to play. On a phone, open More → Enable motion to use its sensors.');
   status();send(true);
  }catch(e){notice(`Could not start sound: ${e instanceof Error?e.message:String(e)}. Try Safari or Chrome.`);startButton.textContent='Try enabling sound again';}
  finally{busy=false;}
