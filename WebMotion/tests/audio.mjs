@@ -17,7 +17,7 @@ function create(){return new Processor({processorOptions:{module,pcm:pcm.buffer.
 let p=create();
 function render(mode,enabled,blocks=400,voice=0,moving=false,frequency=220,vowel=.7){let energy=0,peak=0;const samples=[];
  for(let i=0;i<blocks;i++){
-  if(i%4===0){const t=globalThis.currentTime;p.port.onmessage({data:{type:'state',mode,voice,enabled,frequency,vowel,breath:.55,acceleration:moving?[Math.sin(t*35)*1.8,Math.cos(t*31)*.8,Math.sin(t*33)*1.1]:[0,0,0],tilt:[0,0]}});}
+  if(i%4===0){const t=globalThis.currentTime;p.port.onmessage({data:{type:'state',mode,voice,enabled,frequency,vowel,breath:.55,excitation:mode===2?.7:0,acceleration:moving?[Math.sin(t*35)*1.8,Math.cos(t*31)*.8,Math.sin(t*33)*1.1]:[0,0,0],tilt:[0,0]}});}
   const out=[new Float32Array(128),new Float32Array(128)];p.process([], [out]);
   for(const v of out[0]){assert(Number.isFinite(v));assert(Math.abs(v)<=.9);energy+=v*v;peak=Math.max(peak,Math.abs(v));}samples.push(...out[0]);assert.deepEqual(out[0],out[1]);globalThis.currentTime+=128/globalThis.sampleRate;
  }return {energy,peak,samples};
@@ -46,3 +46,15 @@ assert.notDeepEqual(chamberAudio('box',12,.03),chamberAudio('oval',64,.07));
 for(const rate of [32000,96000]){globalThis.sampleRate=rate;p=create();for(let voice=0;voice<5;voice++)assert(render(1,true,60,voice,false,1760,1).peak<=.9);}
 const model=call('model',{body:{female:0,child:0},sampleRate:48000});const frame=call('frame',{model:model.model,artic:cat.neutral});assert(frame.tongue.length>5);
 console.log('PASS: seven instruments/voices, distinct synth audio, XYZ physical rattle, silent rest/pause, geometry-driven sound, 32/48/96 kHz.');
+
+// End-to-end synthetic IMU trace -> speed estimate -> real CHIMERA audio.
+const {MotionExcitation}=await import('../src/motion-excitation.ts');
+globalThis.sampleRate=48000;globalThis.currentTime=0;p=create();const excitation=new MotionExcitation();let restPeak=0,movingEnergy=0,stoppedPeak=0;
+for(let block=0;block<1875;block++){
+ const t=block*128/48000;globalThis.currentTime=t;
+ if(block%4===0){const moving=t>=1&&t<2;excitation.update([0,0,0],[0,moving?1.2:0,0],t*1000);p.port.onmessage({data:{type:'state',mode:2,enabled:true,frequency:440,vowel:.5,breath:0,excitation:excitation.value(t*1000,.62)}});}
+ const out=[[new Float32Array(128),new Float32Array(128)]];p.process([],out);
+ for(const value of out[0][0]){if(t<.9)restPeak=Math.max(restPeak,Math.abs(value));if(t>1.2&&t<1.9)movingEnergy+=value*value;if(t>3.5)stoppedPeak=Math.max(stoppedPeak,Math.abs(value));}
+}
+assert(restPeak<.0001,'stationary phone produced voice');assert(movingEnergy>.1,'velocity did not excite CHIMERA');assert(stoppedPeak<.0001,'voice did not die away after movement stopped');
+console.log('PASS: synthetic angular velocity drives CHIMERA audio; stationary start and stopped phone silent.',{restPeak,movingEnergy,stoppedPeak});
